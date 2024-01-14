@@ -1,0 +1,430 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>GamePanel.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">tankwar</a> &gt; <a href="index.source.html" class="el_package">com.tankwar</a> &gt; <span class="el_source">GamePanel.java</span></div><h1>GamePanel.java</h1><pre class="source lang-java linenums">package com.tankwar;
+
+import javax.imageio.ImageIO;
+import javax.swing.JFrame;
+
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.Graphics;
+import java.awt.Image;
+import java.awt.Rectangle;
+import java.awt.Toolkit;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
+import java.awt.image.BufferedImage;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+import java.io.*;
+import java.nio.file.*;
+import java.util.concurrent.*;
+
+<span class="fc" id="L23">public class GamePanel extends JFrame {</span>
+<span class="fc" id="L24">    int width = 1000;</span>
+<span class="fc" id="L25">    int height = 720;</span>
+<span class="fc" id="L26">    private Image select = Toolkit.getDefaultToolkit().getImage(&quot;src/main/resources/images/other/star.png&quot;);</span>
+<span class="fc" id="L27">    int selectY = 220;</span>
+<span class="fc" id="L28">    int state = 0;</span>
+    // 0 主菜单 1点击继续游戏选择存档位置 2选完存档位置后进入游戏 3游戏结束
+
+<span class="fc" id="L31">    Image offScreenImage = null;</span>
+
+<span class="fc" id="L33">    public List&lt;byte[]&gt; bytelList = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L34">    public List&lt;Bullet&gt; bulletList = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L35">    public List&lt;Tank&gt; tankList = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L36">    public List&lt;Barrier&gt; barrierList = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L37">    public List&lt;Bullet&gt; removeBulletList = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L38">    public List&lt;Blast&gt; blastList = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L39">    int timer = 0;</span>
+<span class="fc" id="L40">    int score = 0;</span>
+<span class="fc" id="L41">    boolean lose = true;</span>
+<span class="fc" id="L42">    boolean shutDown = false;</span>
+
+<span class="fc" id="L44">    KeyMonitor monitor = new KeyMonitor();</span>
+    Player player;
+<span class="fc" id="L46">    EnemySpawn enemySpawn = new EnemySpawn();</span>
+<span class="fc" id="L47">    ExecutorService executorService = Executors.newFixedThreadPool(3);</span>
+
+    public void clearAll() {
+<span class="fc bfc" id="L50" title="All 2 branches covered.">        for (Tank tank : tankList)</span>
+<span class="fc" id="L51">            tank.alive = false;</span>
+<span class="fc" id="L52">        tankList.clear();</span>
+<span class="fc" id="L53">        bytelList.clear();</span>
+<span class="fc" id="L54">        bulletList.clear();</span>
+<span class="fc" id="L55">        barrierList.clear();</span>
+<span class="fc" id="L56">        removeBulletList.clear();</span>
+<span class="fc" id="L57">        blastList.clear();</span>
+<span class="fc" id="L58">    }</span>
+
+    public void init() {
+<span class="fc" id="L61">        clearAll();</span>
+<span class="fc" id="L62">        player = new Player(&quot;yellow&quot;, 500, 660, this);</span>
+<span class="fc" id="L63">        tankList.add(player);</span>
+<span class="fc" id="L64">    }</span>
+
+<span class="fc" id="L66">    public class EnemySpawn extends Thread {</span>
+<span class="fc" id="L67">        boolean working = false;</span>
+
+        @Override
+        public void run() {
+            while (true) {
+
+<span class="fc bfc" id="L73" title="All 2 branches covered.">                while (!working) {</span>
+                    try {
+<span class="fc" id="L75">                        Thread.sleep(500);</span>
+<span class="nc" id="L76">                    } catch (InterruptedException e) {</span>
+<span class="nc" id="L77">                        e.printStackTrace();</span>
+<span class="pc" id="L78">                    }</span>
+                }
+
+                try {
+<span class="fc" id="L82">                    Thread.sleep(1000);</span>
+<span class="nc" id="L83">                } catch (InterruptedException e) {</span>
+<span class="nc" id="L84">                    e.printStackTrace();</span>
+<span class="fc" id="L85">                }</span>
+
+<span class="pc bpc" id="L87" title="2 of 4 branches missed.">                if (state == 2 &amp;&amp; tankList.size() &lt;= 5) {</span>
+<span class="fc" id="L88">                    Random random = new Random();</span>
+<span class="fc" id="L89">                    int rnum = random.nextInt(800) + 100;</span>
+<span class="fc" id="L90">                    boolean canSpawn = true;</span>
+<span class="fc bfc" id="L91" title="All 2 branches covered.">                    for (Tank tank : tankList) {</span>
+<span class="pc bpc" id="L92" title="1 of 2 branches missed.">                        if (tank.getRec().intersects(new Rectangle(rnum, 60, 40, 40)))</span>
+<span class="nc" id="L93">                            canSpawn = false;</span>
+<span class="fc" id="L94">                    }</span>
+<span class="pc bpc" id="L95" title="1 of 2 branches missed.">                    if (canSpawn) {</span>
+<span class="fc" id="L96">                        Enemy enemy = new Enemy(&quot;white&quot;, rnum, 60, GamePanel.this);</span>
+<span class="fc" id="L97">                        tankList.add(enemy);</span>
+
+<span class="fc" id="L99">                        Thread enemyThread = new Thread(enemy);</span>
+<span class="fc" id="L100">                        enemyThread.start();</span>
+                    }
+<span class="fc" id="L102">                }</span>
+            }
+        }
+    }
+
+    public void setKeyMonitor() {
+<span class="fc" id="L108">        this.addKeyListener(monitor);</span>
+<span class="fc" id="L109">    }</span>
+
+    public void launch() {
+
+<span class="fc" id="L113">        setTitle(&quot;简易坦克大战&quot;);</span>
+<span class="fc" id="L114">        setSize(width, height);</span>
+<span class="fc" id="L115">        setLocationRelativeTo(null);</span>
+<span class="fc" id="L116">        setDefaultCloseOperation(3);</span>
+<span class="fc" id="L117">        setResizable(false);</span>
+
+<span class="fc" id="L119">        setVisible(true);</span>
+<span class="fc" id="L120">        setKeyMonitor();</span>
+
+<span class="fc" id="L122">        enemySpawn.start();</span>
+<span class="fc" id="L123">        init();</span>
+        while (true) {
+<span class="fc bfc" id="L125" title="All 2 branches covered.">            if (state == 2)</span>
+<span class="fc" id="L126">                enemySpawn.working = true;</span>
+            else
+<span class="fc" id="L128">                enemySpawn.working = false;</span>
+<span class="pc bpc" id="L129" title="1 of 2 branches missed.">            if (player.alive == false)</span>
+<span class="nc" id="L130">                state = 3;</span>
+<span class="fc" id="L131">            repaint();</span>
+            try {
+<span class="fc" id="L133">                Thread.sleep(25);</span>
+<span class="nc" id="L134">            } catch (Exception e) {</span>
+<span class="nc" id="L135">                e.printStackTrace();</span>
+<span class="fc" id="L136">            }</span>
+<span class="pc bpc" id="L137" title="1 of 2 branches missed.">            if (shutDown) {</span>
+<span class="fc" id="L138">                this.dispose();</span>
+<span class="fc" id="L139">                return;</span>
+            }
+        }
+    }
+
+    private class imageWriter implements Runnable {
+        private Image image;
+
+<span class="fc" id="L147">        public imageWriter(Image image) {</span>
+<span class="fc" id="L148">            this.image = image;</span>
+<span class="fc" id="L149">        }</span>
+
+        @Override
+        public void run() {
+<span class="fc" id="L153">            ByteArrayOutputStream baos = new ByteArrayOutputStream();</span>
+            try {
+<span class="fc" id="L155">                ImageIO.write((BufferedImage) image, &quot;png&quot;, baos);</span>
+<span class="fc" id="L156">                byte[] by = baos.toByteArray();</span>
+<span class="fc" id="L157">                bytelList.add(by);</span>
+<span class="nc" id="L158">            } catch (IOException e) {</span>
+<span class="nc" id="L159">                e.printStackTrace();</span>
+<span class="fc" id="L160">            }</span>
+<span class="fc" id="L161">        }</span>
+    }
+
+    @Override
+    public void paint(Graphics g) {
+<span class="fc bfc" id="L166" title="All 2 branches covered.">        if (offScreenImage == null) {</span>
+<span class="fc" id="L167">            offScreenImage = this.createImage(width, height);</span>
+        }
+<span class="fc" id="L169">        Graphics gImage = offScreenImage.getGraphics();</span>
+
+<span class="fc" id="L171">        gImage.setColor(Color.black);</span>
+<span class="fc" id="L172">        gImage.fillRect(0, 0, width, height);</span>
+<span class="fc bfc" id="L173" title="All 2 branches covered.">        if (state == 0) {</span>
+<span class="fc" id="L174">            gImage.setFont(new Font(&quot;宋体&quot;, Font.BOLD, 80));</span>
+
+<span class="fc" id="L176">            gImage.setColor(Color.white);</span>
+<span class="fc" id="L177">            gImage.drawString(&quot;坦克大战&quot;, 340, 150);</span>
+
+<span class="fc" id="L179">            gImage.setFont(new Font(&quot;宋体&quot;, Font.BOLD, 40));</span>
+<span class="fc" id="L180">            gImage.drawString(&quot;开始游戏&quot;, 420, 250);</span>
+<span class="fc" id="L181">            gImage.drawString(&quot;继续游戏&quot;, 420, 350);</span>
+<span class="fc" id="L182">            gImage.drawString(&quot;退出游戏&quot;, 420, 450);</span>
+
+<span class="fc" id="L184">            gImage.drawImage(select, 380, selectY, null);</span>
+<span class="fc" id="L185">            gImage.drawImage(select, 585, selectY, null);</span>
+<span class="fc bfc" id="L186" title="All 2 branches covered.">        } else if (state == 1) {</span>
+<span class="fc" id="L187">            gImage.setFont(new Font(&quot;宋体&quot;, Font.BOLD, 80));</span>
+
+<span class="fc" id="L189">            gImage.setColor(Color.white);</span>
+<span class="fc" id="L190">            gImage.drawString(&quot;坦克大战&quot;, 340, 150);</span>
+
+<span class="fc" id="L192">            gImage.setFont(new Font(&quot;宋体&quot;, Font.BOLD, 40));</span>
+
+<span class="fc" id="L194">            gImage.drawString(&quot;存档 一 &quot;, 420, 250);</span>
+<span class="fc" id="L195">            gImage.drawString(&quot;存档 二 &quot;, 420, 350);</span>
+<span class="fc" id="L196">            gImage.drawString(&quot;存档 三 &quot;, 420, 450);</span>
+
+<span class="fc" id="L198">            gImage.drawImage(select, 380, selectY, null);</span>
+<span class="fc" id="L199">            gImage.drawImage(select, 585, selectY, null);</span>
+<span class="fc bfc" id="L200" title="All 2 branches covered.">        } else if (state == 2) {</span>
+<span class="fc bfc" id="L201" title="All 2 branches covered.">            for (Tank tank : tankList) {</span>
+<span class="fc" id="L202">                tank.paintSelf(gImage);</span>
+<span class="fc" id="L203">            }</span>
+<span class="pc bpc" id="L204" title="1 of 2 branches missed.">            for (Barrier barrier : barrierList) {</span>
+<span class="nc" id="L205">                barrier.paintSelf(gImage);</span>
+<span class="nc" id="L206">            }</span>
+<span class="pc bpc" id="L207" title="1 of 2 branches missed.">            for (Bullet bullet : bulletList) {</span>
+<span class="nc" id="L208">                bullet.paintSelf(gImage);</span>
+<span class="nc" id="L209">            }</span>
+<span class="pc bpc" id="L210" title="1 of 2 branches missed.">            for (Blast blast : blastList) {</span>
+<span class="nc" id="L211">                blast.paintSelf(gImage);</span>
+<span class="nc" id="L212">            }</span>
+<span class="fc" id="L213">            bulletList.removeAll(removeBulletList);</span>
+<span class="fc" id="L214">            gImage.setColor(Color.white);</span>
+<span class="fc" id="L215">            gImage.setFont(new Font(&quot;宋体&quot;, Font.BOLD, 20));</span>
+<span class="fc" id="L216">            gImage.drawString(&quot;按下数字键1、2、3进行存档&quot;, 10, 710);</span>
+<span class="pc bpc" id="L217" title="1 of 2 branches missed.">        } else if (state == 3) {</span>
+<span class="fc" id="L218">            gImage.setFont(new Font(&quot;宋体&quot;, Font.BOLD, 80));</span>
+
+<span class="fc" id="L220">            gImage.setColor(Color.white);</span>
+<span class="fc" id="L221">            gImage.drawString(&quot;坦克大战&quot;, 340, 150);</span>
+
+<span class="fc" id="L223">            gImage.setFont(new Font(&quot;宋体&quot;, Font.BOLD, 40));</span>
+<span class="fc" id="L224">            gImage.drawString(&quot;游戏结束&quot;, 420, 250);</span>
+<span class="fc" id="L225">            gImage.drawString(&quot;得分:&quot; + score, 420, 350);</span>
+<span class="fc" id="L226">            gImage.setFont(new Font(&quot;宋体&quot;, Font.BOLD, 20));</span>
+<span class="fc" id="L227">            gImage.drawString(&quot;按下enter键返回主菜单&quot;, 10, 710);</span>
+        }
+
+<span class="fc" id="L230">        timer += 1;</span>
+<span class="fc" id="L231">        g.drawImage(offScreenImage, 0, 0, null);</span>
+
+<span class="fc" id="L233">        executorService.submit(new imageWriter(offScreenImage));</span>
+
+<span class="fc" id="L235">    }</span>
+
+    public void save(String path) {
+        FileWriter writer;
+        try {
+<span class="fc" id="L240">            writer = new FileWriter(path, false);</span>
+<span class="fc" id="L241">            writer.write(&quot;&quot;);</span>
+<span class="fc" id="L242">            writer.close();</span>
+
+<span class="fc" id="L244">            writer = new FileWriter(path, true);</span>
+            String s;
+<span class="fc bfc" id="L246" title="All 2 branches covered.">            for (Bullet bullet : bulletList) {</span>
+<span class="fc" id="L247">                s = &quot;bullet,&quot; + bullet.x + &quot;,&quot; + bullet.y + &quot;,&quot; + bullet.direction + &quot;,&quot; + bullet.friendly + &quot;,&quot;</span>
+                        + bullet.color + &quot;\n&quot;;
+<span class="fc" id="L249">                writer.write(s);</span>
+<span class="fc" id="L250">            }</span>
+
+<span class="fc bfc" id="L252" title="All 2 branches covered.">            for (Tank tank : tankList) {</span>
+<span class="fc" id="L253">                s = &quot;tank,&quot; + tank.x + &quot;,&quot; + tank.y + &quot;,&quot; + tank.color + &quot;,&quot; + tank.friendly + &quot;\n&quot;;</span>
+<span class="fc" id="L254">                writer.write(s);</span>
+<span class="fc" id="L255">            }</span>
+
+<span class="fc bfc" id="L257" title="All 2 branches covered.">            for (Barrier barrier : barrierList) {</span>
+<span class="fc" id="L258">                s = barrier.type + &quot;,&quot; + barrier.x + &quot;,&quot; + barrier.y + &quot;\n&quot;;</span>
+<span class="fc" id="L259">                writer.write(s);</span>
+<span class="fc" id="L260">            }</span>
+
+<span class="fc bfc" id="L262" title="All 2 branches covered.">            for (Blast blast : blastList) {</span>
+<span class="fc" id="L263">                s = &quot;blast,&quot; + blast.x + &quot;,&quot; + blast.y + &quot;,&quot; + blast.explodeCount + &quot;\n&quot;;</span>
+<span class="fc" id="L264">                writer.write(s);</span>
+<span class="fc" id="L265">            }</span>
+<span class="fc" id="L266">            writer.flush();</span>
+<span class="nc" id="L267">        } catch (IOException e) {</span>
+<span class="nc" id="L268">            e.printStackTrace();</span>
+<span class="fc" id="L269">        }</span>
+
+<span class="fc" id="L271">    }</span>
+
+    public void load(String path) throws IOException {
+<span class="fc" id="L274">        List&lt;String&gt; lines = Files.readAllLines(Paths.get(path));</span>
+<span class="fc bfc" id="L275" title="All 2 branches covered.">        for (String s : lines) {</span>
+<span class="fc" id="L276">            String[] splitS = s.split(&quot;,&quot;);</span>
+<span class="fc" id="L277">            int sx = Integer.parseInt(splitS[1]);</span>
+<span class="fc" id="L278">            int sy = Integer.parseInt(splitS[2]);</span>
+<span class="fc bfc" id="L279" title="All 2 branches covered.">            if (splitS.length == 3) {</span>
+<span class="fc" id="L280">                barrierList</span>
+<span class="fc" id="L281">                        .add(new Barrier(&quot;src/main/resources/images/barrier/&quot; + splitS[0] + &quot;.png&quot;, sx, sy,</span>
+                                splitS[0], this));
+<span class="fc bfc" id="L283" title="All 2 branches covered.">            } else if (splitS.length == 4) {</span>
+<span class="fc" id="L284">                blastList.add(new Blast(sx, sy, Integer.parseInt(splitS[3])));</span>
+<span class="fc bfc" id="L285" title="All 2 branches covered.">            } else if (splitS.length == 5) {</span>
+<span class="fc" id="L286">                int sfriendly = Integer.parseInt(splitS[4]);</span>
+<span class="pc bpc" id="L287" title="1 of 2 branches missed.">                if (sfriendly == 1) {</span>
+<span class="fc" id="L288">                    player = new Player(splitS[3], sx, sy, GamePanel.this);</span>
+<span class="fc" id="L289">                    tankList.add(player);</span>
+                } else {
+<span class="nc" id="L291">                    Enemy enemy = new Enemy(&quot;white&quot;, sx, sy, GamePanel.this);</span>
+<span class="nc" id="L292">                    tankList.add(enemy);</span>
+<span class="nc" id="L293">                    Thread enemyThread = new Thread(enemy);</span>
+<span class="nc" id="L294">                    enemyThread.start();</span>
+                }
+<span class="pc bpc" id="L296" title="1 of 2 branches missed.">            } else if (splitS.length == 6) {</span>
+<span class="fc" id="L297">                bulletList.add(</span>
+                        new Bullet(&quot;src/main/resources/images/other/&quot; + splitS[3] + &quot;Bullet.png&quot;, sx, sy, splitS[3],
+<span class="fc" id="L299">                                Integer.parseInt(splitS[4]), splitS[5], GamePanel.this));</span>
+            }
+<span class="fc" id="L301">        }</span>
+
+<span class="fc" id="L303">    }</span>
+
+    public void replay(String path) {
+<span class="fc" id="L306">        Graphics g = this.getGraphics();</span>
+
+<span class="fc" id="L308">        try (ObjectInputStream ois = new ObjectInputStream(</span>
+                new FileInputStream(path))) {
+<span class="fc" id="L310">            byte[][] byArray = (byte[][]) ois.readObject();</span>
+<span class="pc bpc" id="L311" title="1 of 2 branches missed.">            for (byte[] by : byArray) {</span>
+<span class="nc" id="L312">                ByteArrayInputStream bis = new ByteArrayInputStream(by);</span>
+<span class="nc" id="L313">                BufferedImage image = ImageIO.read(bis);</span>
+<span class="nc" id="L314">                g.drawImage(image, 0, 0, null);</span>
+            }
+<span class="nc" id="L316">        } catch (IOException | ClassNotFoundException e) {</span>
+<span class="nc" id="L317">            e.printStackTrace();</span>
+<span class="fc" id="L318">        }</span>
+<span class="fc" id="L319">    }</span>
+
+    public void saveReplay(String path) {
+<span class="fc" id="L322">        try (ObjectOutputStream oos = new ObjectOutputStream(</span>
+                new FileOutputStream(path))) {
+<span class="fc" id="L324">            oos.writeObject(listTo2DArray(bytelList));</span>
+<span class="nc" id="L325">        } catch (IOException e) {</span>
+<span class="nc" id="L326">            e.printStackTrace();</span>
+<span class="fc" id="L327">        }</span>
+<span class="fc" id="L328">    }</span>
+
+    public static byte[][] listTo2DArray(List&lt;byte[]&gt; list) {
+<span class="fc" id="L331">        int numRows = list.size();</span>
+<span class="fc" id="L332">        int numCols = 0;</span>
+<span class="pc bpc" id="L333" title="1 of 2 branches missed.">        for (byte[] b : list) {</span>
+<span class="nc bnc" id="L334" title="All 2 branches missed.">            if (numCols &lt; b.length)</span>
+<span class="nc" id="L335">                numCols = b.length;</span>
+<span class="nc" id="L336">        }</span>
+
+<span class="fc" id="L338">        byte[][] twoDArray = new byte[numRows][numCols];</span>
+
+<span class="pc bpc" id="L340" title="1 of 2 branches missed.">        for (int i = 0; i &lt; numRows; i++) {</span>
+<span class="nc" id="L341">            twoDArray[i] = list.get(i);</span>
+        }
+
+<span class="fc" id="L344">        return twoDArray;</span>
+    }
+
+<span class="fc" id="L347">    public class KeyMonitor extends KeyAdapter {</span>
+        @Override
+        public void keyPressed(KeyEvent e) {
+<span class="fc" id="L350">            int key = e.getKeyCode();</span>
+<span class="fc bfc" id="L351" title="All 2 branches covered.">            if (state == 2) {</span>
+<span class="fc" id="L352">                player.keyPressed(e);</span>
+<span class="fc" id="L353">                return;</span>
+            }
+
+<span class="fc bfc" id="L356" title="All 2 branches covered.">            if (state == 3) {</span>
+<span class="pc bpc" id="L357" title="1 of 2 branches missed.">                if (key == KeyEvent.VK_ENTER) {</span>
+<span class="fc" id="L358">                    state = 0;</span>
+<span class="fc" id="L359">                    init();</span>
+                }
+<span class="fc" id="L361">                return;</span>
+            }
+
+<span class="pc bpc" id="L364" title="1 of 5 branches missed.">            switch (key) {</span>
+                case KeyEvent.VK_UP:
+<span class="fc bfc" id="L366" title="All 2 branches covered.">                    if (selectY &gt; 220)</span>
+<span class="fc" id="L367">                        selectY -= 100;</span>
+                    break;
+                case KeyEvent.VK_DOWN:
+<span class="fc bfc" id="L370" title="All 2 branches covered.">                    if (selectY &lt; 420)</span>
+<span class="fc" id="L371">                        selectY += 100;</span>
+                    break;
+                case KeyEvent.VK_ENTER: {
+                    try {
+<span class="pc bpc" id="L375" title="1 of 2 branches missed.">                        if (state == 0) {</span>
+<span class="fc bfc" id="L376" title="All 2 branches covered.">                            if (selectY == 220) {</span>
+<span class="fc" id="L377">                                init();</span>
+<span class="fc" id="L378">                                state = 2;</span>
+<span class="fc" id="L379">                                load(&quot;src\\main\\resources\\save\\save0&quot;);</span>
+<span class="fc bfc" id="L380" title="All 2 branches covered.">                            } else if (selectY == 320)</span>
+<span class="fc" id="L381">                                state = 1;</span>
+<span class="pc bpc" id="L382" title="1 of 2 branches missed.">                            else if (selectY == 420) {</span>
+<span class="fc" id="L383">                                GamePanel.this.dispose();</span>
+<span class="fc" id="L384">                                shutDown = true;</span>
+                            }
+<span class="nc bnc" id="L386" title="All 2 branches missed.">                        } else if (state == 1) {</span>
+<span class="nc" id="L387">                            enemySpawn.working = false;</span>
+
+<span class="nc bnc" id="L389" title="All 2 branches missed.">                            if (selectY == 220) {</span>
+<span class="nc" id="L390">                                replay(&quot;src/main/resources/replay/replay1&quot;);</span>
+<span class="nc" id="L391">                                clearAll();</span>
+<span class="nc" id="L392">                                load(&quot;src\\main\\resources\\save\\save1&quot;);</span>
+<span class="nc bnc" id="L393" title="All 2 branches missed.">                            } else if (selectY == 320) {</span>
+<span class="nc" id="L394">                                replay(&quot;src/main/resources/replay/replay2&quot;);</span>
+<span class="nc" id="L395">                                clearAll();</span>
+<span class="nc" id="L396">                                load(&quot;src\\main\\resources\\save\\save2&quot;);</span>
+<span class="nc bnc" id="L397" title="All 2 branches missed.">                            } else if (selectY == 420) {</span>
+<span class="nc" id="L398">                                replay(&quot;src/main/resources/replay/replay3&quot;);</span>
+<span class="nc" id="L399">                                clearAll();</span>
+<span class="nc" id="L400">                                load(&quot;src\\main\\resources\\save\\save3&quot;);</span>
+                            }
+<span class="nc" id="L402">                            state = 2;</span>
+                        }
+<span class="nc" id="L404">                    } catch (Exception exce) {</span>
+<span class="nc" id="L405">                        exce.printStackTrace();</span>
+<span class="fc" id="L406">                    }</span>
+<span class="nc" id="L407">                    break;</span>
+                }
+                case KeyEvent.VK_ESCAPE: {
+<span class="fc" id="L410">                    state = 0;</span>
+                }
+                default:
+
+            }
+<span class="fc" id="L415">        }</span>
+
+        @Override
+        public void keyReleased(KeyEvent e) {
+<span class="nc bnc" id="L419" title="All 2 branches missed.">            if (state == 2) {</span>
+<span class="nc" id="L420">                player.keyReleased(e);</span>
+            }
+<span class="nc" id="L422">        }</span>
+    }
+
+    public static void main(String[] args) {
+<span class="nc" id="L426">        GamePanel tankWar = new GamePanel();</span>
+<span class="nc" id="L427">        tankWar.launch();</span>
+<span class="nc" id="L428">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

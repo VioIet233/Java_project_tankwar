@@ -1,0 +1,5 @@
+bullet,0,0,UP,0,yellow
+bullet,45,15,RIGHT,0,white
+tank,0,0,white,0
+wall,0,0
+blast,0,0,0

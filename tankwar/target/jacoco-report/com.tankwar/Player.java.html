@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Player.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">tankwar</a> &gt; <a href="index.source.html" class="el_package">com.tankwar</a> &gt; <span class="el_source">Player.java</span></div><h1>Player.java</h1><pre class="source lang-java linenums">package com.tankwar;
+
+import java.awt.*;
+import java.awt.event.KeyEvent;
+
+public class Player extends Tank {
+
+<span class="fc" id="L8">    public Player() {</span>
+
+<span class="fc" id="L10">    }</span>
+
+    public Player(String color, int x, int y, GamePanel gamePanel) {
+<span class="fc" id="L13">        super(color, x, y, 1, gamePanel);</span>
+<span class="fc" id="L14">    }</span>
+
+    public void keyPressed(KeyEvent e) {
+<span class="fc" id="L17">        int key = e.getKeyCode();</span>
+<span class="pc bpc" id="L18" title="4 of 10 branches missed.">        switch (key) {</span>
+            case KeyEvent.VK_W:
+<span class="fc" id="L20">                upMoving = true;</span>
+<span class="fc" id="L21">                break;</span>
+            case KeyEvent.VK_S:
+<span class="fc" id="L23">                downMoving = true;</span>
+<span class="fc" id="L24">                break;</span>
+            case KeyEvent.VK_A:
+<span class="fc" id="L26">                leftMoving = true;</span>
+<span class="fc" id="L27">                break;</span>
+            case KeyEvent.VK_D:
+<span class="fc" id="L29">                rightMoving = true;</span>
+<span class="fc" id="L30">                break;</span>
+            case KeyEvent.VK_SPACE:
+<span class="nc" id="L32">                attack();</span>
+<span class="nc" id="L33">                break;</span>
+            case KeyEvent.VK_ESCAPE:
+<span class="fc" id="L35">                alive = false;</span>
+<span class="fc" id="L36">                break;</span>
+            case KeyEvent.VK_1:
+<span class="nc" id="L38">                gamePanel.saveReplay(&quot;src/main/resources/replay/replay1&quot;);</span>
+<span class="nc" id="L39">                gamePanel.save(&quot;src\\main\\resources\\save\\save1&quot;);</span>
+<span class="nc" id="L40">                break;</span>
+            case KeyEvent.VK_2:
+<span class="nc" id="L42">                gamePanel.saveReplay(&quot;src/main/resources/replay/replay2&quot;);</span>
+<span class="nc" id="L43">                gamePanel.save(&quot;src\\main\\resources\\save\\save2&quot;);</span>
+<span class="nc" id="L44">                break;</span>
+            case KeyEvent.VK_3:
+<span class="nc" id="L46">                gamePanel.saveReplay(&quot;src/main/resources/replay/replay3&quot;);</span>
+<span class="nc" id="L47">                gamePanel.save(&quot;src\\main\\resources\\save\\save3&quot;);</span>
+<span class="nc" id="L48">                break;</span>
+            default:
+                break;
+        }
+<span class="fc" id="L52">    }</span>
+
+    public void keyReleased(KeyEvent e) {
+<span class="fc" id="L55">        int key = e.getKeyCode();</span>
+<span class="pc bpc" id="L56" title="1 of 5 branches missed.">        switch (key) {</span>
+            case KeyEvent.VK_W:
+<span class="fc" id="L58">                upMoving = false;</span>
+<span class="fc" id="L59">                break;</span>
+            case KeyEvent.VK_S:
+<span class="fc" id="L61">                downMoving = false;</span>
+<span class="fc" id="L62">                break;</span>
+            case KeyEvent.VK_A:
+<span class="fc" id="L64">                leftMoving = false;</span>
+<span class="fc" id="L65">                break;</span>
+            case KeyEvent.VK_D:
+<span class="fc" id="L67">                rightMoving = false;</span>
+<span class="fc" id="L68">                break;</span>
+            default:
+                break;
+        }
+<span class="fc" id="L72">    }</span>
+
+    public void move() {
+<span class="pc bpc" id="L75" title="1 of 2 branches missed.">        if (upMoving)</span>
+<span class="nc" id="L76">            upMove();</span>
+<span class="pc bpc" id="L77" title="1 of 2 branches missed.">        else if (downMoving)</span>
+<span class="nc" id="L78">            downMove();</span>
+<span class="pc bpc" id="L79" title="1 of 2 branches missed.">        else if (leftMoving)</span>
+<span class="nc" id="L80">            leftMove();</span>
+<span class="pc bpc" id="L81" title="1 of 2 branches missed.">        else if (rightMoving)</span>
+<span class="nc" id="L82">            rightMove();</span>
+<span class="fc" id="L83">    }</span>
+
+    @Override
+    public void paintSelf(Graphics g) {
+<span class="fc" id="L87">        g.drawImage(img, x, y, null);</span>
+<span class="fc" id="L88">        move();</span>
+<span class="fc" id="L89">        attackCD();</span>
+<span class="fc" id="L90">    }</span>
+    // @Override
+    // public Rectangle getRec() {
+    // return new Rectangle(x, y, width, height);
+    // }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

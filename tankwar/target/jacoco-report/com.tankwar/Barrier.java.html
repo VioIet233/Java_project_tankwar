@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Barrier.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">tankwar</a> &gt; <a href="index.source.html" class="el_package">com.tankwar</a> &gt; <span class="el_source">Barrier.java</span></div><h1>Barrier.java</h1><pre class="source lang-java linenums">package com.tankwar;
+
+import java.awt.*;
+
+public class Barrier extends Object {
+
+    String type;
+    boolean destructible;
+    boolean traversable;
+
+    Barrier(String img, int x, int y, String type, GamePanel gamePanel) {
+<span class="fc" id="L12">        super(img, x, y, gamePanel);</span>
+<span class="fc" id="L13">        this.type = type;</span>
+<span class="fc" id="L14">        width = 36;</span>
+<span class="fc" id="L15">        height = 36;</span>
+<span class="pc bpc" id="L16" title="1 of 5 branches missed.">        switch (type) {</span>
+            case &quot;wall&quot;:
+<span class="fc" id="L18">                destructible = true;</span>
+<span class="fc" id="L19">                traversable = false;</span>
+<span class="fc" id="L20">                break;</span>
+            case &quot;iron&quot;:
+<span class="fc" id="L22">                destructible = false;</span>
+<span class="fc" id="L23">                traversable = false;</span>
+<span class="fc" id="L24">                break;</span>
+            case &quot;riverLR&quot;:
+<span class="fc" id="L26">                destructible = false;</span>
+<span class="fc" id="L27">                traversable = true;</span>
+<span class="fc" id="L28">                break;</span>
+            case &quot;riverUD&quot;:
+<span class="fc" id="L30">                destructible = false;</span>
+<span class="fc" id="L31">                traversable = true;</span>
+<span class="fc" id="L32">                break;</span>
+            default:
+                break;
+        }
+<span class="fc" id="L36">    }</span>
+
+    @Override
+    public void paintSelf(Graphics g) {
+<span class="nc" id="L40">        g.drawImage(img, x, y, null);</span>
+<span class="nc" id="L41">    }</span>
+
+    @Override
+    public Rectangle getRec() {
+<span class="fc" id="L45">        return new Rectangle(x, y, width, height);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

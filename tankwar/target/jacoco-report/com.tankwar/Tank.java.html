@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Tank.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">tankwar</a> &gt; <a href="index.source.html" class="el_package">com.tankwar</a> &gt; <span class="el_source">Tank.java</span></div><h1>Tank.java</h1><pre class="source lang-java linenums">package com.tankwar;
+
+import java.awt.*;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.util.List;
+
+public class Tank extends Object {
+    private String upImage;
+    private String downImage;
+    private String rightImage;
+    private String leftImage;
+
+<span class="fc" id="L14">    String direction = &quot;UP&quot;;</span>
+
+<span class="fc" id="L16">    boolean upMoving = false;</span>
+<span class="fc" id="L17">    boolean downMoving = false;</span>
+<span class="fc" id="L18">    boolean leftMoving = false;</span>
+<span class="fc" id="L19">    boolean rightMoving = false;</span>
+    String color;
+
+<span class="fc" id="L22">    boolean coolDown = true;</span>
+<span class="fc" id="L23">    int coolDownTime = 30;</span>
+
+<span class="fc" id="L25">    int timer = 0;</span>
+
+<span class="fc" id="L27">    boolean alive = true;</span>
+<span class="fc" id="L28">    int friendly = 0;</span>
+
+<span class="fc" id="L30">    public Tank() {</span>
+
+<span class="fc" id="L32">    }</span>
+
+    public Tank(String color, int x, int y, int friendly, GamePanel gamePanel) {
+<span class="fc" id="L35">        super(&quot;src/main/resources/images/tank/&quot; + color + &quot;Up.png&quot;, x, y, gamePanel);</span>
+<span class="fc" id="L36">        this.upImage = &quot;src/main/resources/images/tank/&quot; + color + &quot;Up.png&quot;;</span>
+<span class="fc" id="L37">        this.downImage = &quot;src/main/resources/images/tank/&quot; + color + &quot;Down.png&quot;;</span>
+<span class="fc" id="L38">        this.leftImage = &quot;src/main/resources/images/tank/&quot; + color + &quot;Left.png&quot;;</span>
+<span class="fc" id="L39">        this.rightImage = &quot;src/main/resources/images/tank/&quot; + color + &quot;Right.png&quot;;</span>
+<span class="fc" id="L40">        this.color = color;</span>
+<span class="fc" id="L41">        this.friendly = friendly;</span>
+<span class="fc" id="L42">        width = 40;</span>
+<span class="fc" id="L43">        height = 40;</span>
+<span class="fc" id="L44">        speed = 3;</span>
+
+<span class="fc" id="L46">    }</span>
+
+    public void upMove() {
+<span class="fc" id="L49">        direction = &quot;UP&quot;;</span>
+<span class="fc" id="L50">        setImg(upImage);</span>
+<span class="fc bfc" id="L51" title="All 2 branches covered.">        if (canMove(x, y - speed))</span>
+<span class="fc" id="L52">            this.y -= speed;</span>
+
+<span class="fc" id="L54">    }</span>
+
+    public void downMove() {
+<span class="fc" id="L57">        direction = &quot;DOWN&quot;;</span>
+<span class="fc" id="L58">        setImg(downImage);</span>
+<span class="pc bpc" id="L59" title="1 of 2 branches missed.">        if (canMove(x, y + speed))</span>
+<span class="nc" id="L60">            this.y += speed;</span>
+<span class="fc" id="L61">    }</span>
+
+    public void leftMove() {
+<span class="nc" id="L64">        direction = &quot;LEFT&quot;;</span>
+<span class="nc" id="L65">        setImg(leftImage);</span>
+<span class="nc bnc" id="L66" title="All 2 branches missed.">        if (canMove(x - speed, y))</span>
+<span class="nc" id="L67">            this.x -= speed;</span>
+
+<span class="nc" id="L69">    }</span>
+
+    public void rightMove() {
+<span class="fc" id="L72">        direction = &quot;RIGHT&quot;;</span>
+<span class="fc" id="L73">        setImg(rightImage);</span>
+<span class="fc bfc" id="L74" title="All 2 branches covered.">        if (canMove(x + speed, y))</span>
+<span class="fc" id="L75">            this.x += speed;</span>
+<span class="fc" id="L76">    }</span>
+
+    public Point getHeadPoint() {
+<span class="pc bpc" id="L79" title="1 of 5 branches missed.">        switch (direction) {</span>
+            case &quot;UP&quot;:
+<span class="fc" id="L81">                return new Point(x + width / 2, y);</span>
+            case &quot;LEFT&quot;:
+<span class="fc" id="L83">                return new Point(x, y + height / 2);</span>
+            case &quot;DOWN&quot;:
+<span class="fc" id="L85">                return new Point(x + width / 2, y + height);</span>
+            case &quot;RIGHT&quot;:
+<span class="fc" id="L87">                return new Point(x + width, y + height / 2);</span>
+            default:
+<span class="nc" id="L89">                return null;</span>
+        }
+    }
+
+    public void attack() {
+<span class="fc" id="L94">        Point p = getHeadPoint();</span>
+<span class="pc bpc" id="L95" title="1 of 5 branches missed.">        switch (direction) {</span>
+            case &quot;UP&quot;:
+<span class="fc" id="L97">                p.y -= 10;</span>
+<span class="fc" id="L98">                break;</span>
+            case &quot;DOWN&quot;:
+<span class="fc" id="L100">                p.y += 10;</span>
+<span class="fc" id="L101">                break;</span>
+            case &quot;LEFT&quot;:
+<span class="fc" id="L103">                p.x -= 10;</span>
+<span class="fc" id="L104">                break;</span>
+            case &quot;RIGHT&quot;:
+<span class="fc" id="L106">                p.x += 10;</span>
+                break;
+        }
+<span class="pc bpc" id="L109" title="1 of 4 branches missed.">        if (coolDown &amp;&amp; alive) {</span>
+<span class="fc" id="L110">            Bullet bullet = new Bullet(&quot;src/main/resources/images/other/&quot; + color + &quot;Bullet.png&quot;, p.x - 5, p.y - 5, direction,</span>
+                    this.friendly, color, this.gamePanel);
+<span class="fc" id="L112">            this.gamePanel.bulletList.add(bullet);</span>
+<span class="fc" id="L113">            coolDown = false;</span>
+        }
+<span class="fc" id="L115">    }</span>
+
+    public void attackCD() {
+<span class="fc bfc" id="L118" title="All 2 branches covered.">        if (coolDown == false)</span>
+<span class="fc" id="L119">            timer++;</span>
+<span class="fc bfc" id="L120" title="All 2 branches covered.">        if (timer &gt; coolDownTime) {</span>
+<span class="fc" id="L121">            coolDown = true;</span>
+<span class="fc" id="L122">            timer = 0;</span>
+        }
+<span class="fc" id="L124">    }</span>
+
+    public boolean hitBarrier(int x, int y) {
+<span class="fc" id="L127">        Rectangle next = new Rectangle(x, y, width, height);</span>
+
+<span class="fc" id="L129">        List&lt;Barrier&gt; barriers = this.gamePanel.barrierList;</span>
+<span class="fc" id="L130">        List&lt;Tank&gt; tanks = this.gamePanel.tankList;</span>
+<span class="fc bfc" id="L131" title="All 2 branches covered.">        for (Barrier b : barriers) {</span>
+<span class="pc bpc" id="L132" title="1 of 2 branches missed.">            if (b.getRec().intersects(next)) {</span>
+<span class="fc" id="L133">                return true;</span>
+            }
+<span class="nc" id="L135">        }</span>
+<span class="fc bfc" id="L136" title="All 2 branches covered.">        for (Tank t : tanks) {</span>
+<span class="pc bpc" id="L137" title="1 of 6 branches missed.">            if (t.x != x &amp;&amp; t.y != y &amp;&amp; t.getRec().intersects(next)) {</span>
+<span class="nc" id="L138">                return true;</span>
+            }
+<span class="fc" id="L140">        }</span>
+
+<span class="fc" id="L142">        return false;</span>
+    }
+
+    public boolean moveBorder(int x, int y) {
+<span class="pc bpc" id="L146" title="1 of 4 branches missed.">        if (x &lt; 10 || x &gt; this.gamePanel.getWidth() - width - 10) {</span>
+<span class="fc" id="L147">            return true;</span>
+        }
+<span class="pc bpc" id="L149" title="1 of 4 branches missed.">        if (y &lt; 10 || y &gt; this.gamePanel.getHeight() - height - 10) {</span>
+<span class="fc" id="L150">            return true;</span>
+        }
+<span class="fc" id="L152">        return false;</span>
+    }
+
+    public boolean canMove(int x, int y) {
+<span class="fc bfc" id="L156" title="All 4 branches covered.">        return !hitBarrier(x, y) &amp;&amp; !moveBorder(x, y);</span>
+    }
+
+    @Override
+    public void paintSelf(Graphics g) {
+<span class="nc" id="L161">    }</span>
+
+    @Override
+    public Rectangle getRec() {
+<span class="fc" id="L165">        return new Rectangle(x, y, width, height);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>
